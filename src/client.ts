@@ -81,6 +81,7 @@ export class Client {
       try {
         paramDict = JSON.parse(params);
       } catch (err: any) {
+        console.info('params:', params);
         throw new Error('Parameter params must be a valid JSON object. JSON parse error: ' + err.message);
       }
       
