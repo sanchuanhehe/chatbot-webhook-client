@@ -31,13 +31,13 @@ jobs:
           cache: 'pnpm'
           
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
 
       - name: Run format check
         run: pnpm run format-check
         
       - name: Build package
-        run: pnpm run build
+        run: npm run build
         
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
