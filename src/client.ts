@@ -84,14 +84,14 @@ export class Client {
         console.info('params:', params);
         throw new Error('Parameter params must be a valid JSON object. JSON parse error: ' + err.message);
       }
-      
+
       // 获取模板文件内容
       template = await this.getTemplateByFileURI(template, githubToken, branch);
-      
+
       try {
         // 先将模板解析为JSON对象
         const templateObj = JSON.parse(template);
-        
+
         // 递归函数，替换JSON对象中的所有占位符
         const replaceTemplateVars = (obj: any): any => {
           if (typeof obj === 'string') {
@@ -114,7 +114,7 @@ export class Client {
           }
           return obj;
         };
-        
+
         // 替换模板中的所有变量
         payload = replaceTemplateVars(templateObj);
       } catch (err: any) {
@@ -127,7 +127,7 @@ export class Client {
         throw new Error('Parameter template must be a JSON object. JSON parse error: ' + err.message);
       }
     }
-    
+
     return { app, webhook, secret, payload };
   }
 
