@@ -18,17 +18,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'pnpm'
-          
       - name: Setup PNPM
         uses: pnpm/action-setup@v3
         with:
           version: 8
           run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
           
       - name: Install dependencies
         run: pnpm install
@@ -57,18 +57,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           registry-url: 'https://registry.npmjs.org'
           cache: 'pnpm'
-          
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-          run_install: false
           
       - name: Install dependencies
         run: pnpm install
@@ -93,31 +93,31 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-    #   - name: Notify on publish success
-    #     uses: northwang-lucky/chatbot-webhook-client@latest
-    #     with:
-    #       app: Lark
-    #       webhook: ${{ secrets.CUSTOM_BOT_WEBHOOK }}
-    #       secret: ${{ secrets.CUSTOM_BOT_SECRET }}
-    #       template: >-
-    #         {
-    #           "msg_type": "interactive",
-    #           "card": {
-    #             "elements": [
-    #               {
-    #                 "tag": "div",
-    #                 "text": {
-    #                   "tag": "lark_md",
-    #                   "content": "版本 **${{ github.ref_name }}** 已成功发布到 npm!"
-    #                 }
-    #               }
-    #             ],
-    #             "header": {
-    #               "template": "green",
-    #               "title": {
-    #                 "tag": "plain_text",
-    #                 "content": "📦 包发布成功"
-    #               }
-    #             }
-    #           }
-    #         }
+      - name: Notify on publish success
+        uses: ./
+        with:
+          app: Lark
+          webhook: ${{ secrets.CUSTOM_BOT_WEBHOOK }}
+          secret: ${{ secrets.CUSTOM_BOT_SECRET }}
+          template: >-
+            {
+              "msg_type": "interactive",
+              "card": {
+                "elements": [
+                  {
+                    "tag": "div",
+                    "text": {
+                      "tag": "lark_md",
+                      "content": "版本 **${{ github.ref_name }}** 已成功发布到 npm!"
+                    }
+                  }
+                ],
+                "header": {
+                  "template": "green",
+                  "title": {
+                    "tag": "plain_text",
+                    "content": "📦 包发布成功"
+                  }
+                }
+              }
+            }
