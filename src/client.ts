@@ -77,17 +77,56 @@ export class Client {
     let payload: Body = {};
     // template maybe a json object or a file URI
     if (templateIsFileURI && params && githubToken) {
-      const paramDict = JSON.parse(params);
+      let paramDict;
+      try {
+        paramDict = JSON.parse(params);
+      } catch (err: any) {
+        throw new Error('Parameter params must be a valid JSON object. JSON parse error: ' + err.message);
+      }
+      
+      // 获取模板文件内容
       template = await this.getTemplateByFileURI(template, githubToken, branch);
-      template = template.replace(/\$\{(.*?)\}/g, (_, f) => `\${params.${f}}`);
-      template = new Function('params', `return \`${template}\``)(paramDict);
+      
+      try {
+        // 先将模板解析为JSON对象
+        const templateObj = JSON.parse(template);
+        
+        // 递归函数，替换JSON对象中的所有占位符
+        const replaceTemplateVars = (obj: any): any => {
+          if (typeof obj === 'string') {
+            // 替换字符串中的所有${xxx}占位符
+            return obj.replace(/\$\{(.*?)\}/g, (match, key) => {
+              return paramDict[key] !== undefined ? String(paramDict[key]) : match;
+            });
+          } else if (Array.isArray(obj)) {
+            // 处理数组
+            return obj.map(item => replaceTemplateVars(item));
+          } else if (obj !== null && typeof obj === 'object') {
+            // 处理对象
+            const result: Record<string, any> = {};
+            for (const key in obj) {
+              if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                result[key] = replaceTemplateVars(obj[key]);
+              }
+            }
+            return result;
+          }
+          return obj;
+        };
+        
+        // 替换模板中的所有变量
+        payload = replaceTemplateVars(templateObj);
+      } catch (err: any) {
+        throw new Error('Template file must contain valid JSON. JSON parse error: ' + err.message);
+      }
+    } else {
+      try {
+        payload = JSON.parse(template);
+      } catch (err: any) {
+        throw new Error('Parameter template must be a JSON object. JSON parse error: ' + err.message);
+      }
     }
-
-    try {
-      payload = JSON.parse(template);
-    } catch (err: any) {
-      throw new Error('Parameter template must be a JSON object or a file URI. JSON parse error: ' + err.message);
-    }
+    
     return { app, webhook, secret, payload };
   }
 
