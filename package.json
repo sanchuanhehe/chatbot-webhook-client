@@ -6,10 +6,10 @@
   "author": "northwang <69568203+northwang-lucky@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
-    "format": "prettier --write '**/*.ts'",
-    "format-check": "prettier --check '**/*.ts'",
+    "format": "prettier --write \"**/*.ts\"",
+    "format-check": "prettier --check \"**/*.ts\"",
     "package": "ncc build --source-map --license licenses.txt",
-    "build": "rimraf ./dist && pnpm format && tsc && pnpm package",
+    "build": "rimraf ./dist && npm run format && tsc && npm run package",
     "release:major": "standard-version --release-as major",
     "release:minor": "standard-version --release-as minor",
     "release:patch": "standard-version --release-as patch",
@@ -30,6 +30,7 @@
   "dependencies": {
     "@actions/core": "1.10.0",
     "@actions/github": "5.1.1",
+    "pnpm": "^10.10.0",
     "request": "2.88.2"
   },
   "devDependencies": {
@@ -41,6 +42,6 @@
     "prettier": "2.5.1",
     "rimraf": "4.1.2",
     "standard-version": "9.5.0",
-    "typescript": "4.4.4"
+    "typescript": "4.7.4"
   }
 }

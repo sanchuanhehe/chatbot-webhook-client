@@ -77,7 +77,7 @@ export class Client {
     let payload: Body = {};
     // template maybe a json object or a file URI
     if (templateIsFileURI && params && githubToken) {
-      let paramDict;
+      let paramDict: Record<string, any>;
       try {
         paramDict = JSON.parse(params);
       } catch (err: any) {
@@ -124,7 +124,8 @@ export class Client {
       try {
         payload = JSON.parse(template);
       } catch (err: any) {
-        throw new Error('Parameter template must be a JSON object. JSON parse error: ' + err.message
+        throw new Error(
+          'Parameter template must be a JSON object. JSON parse error: ' + err.message
           // + '\n' + template
         );
       }
