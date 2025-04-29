@@ -48,6 +48,15 @@ jobs:
           path: dist/
           retention-days: 7
 
+      - name: Update latest tag
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add -f dist
+          git commit -m "Update latest tag"
+          git tag -f latest
+          git push -f origin latest
+
   publish:
     needs: build
     if: startsWith(github.ref, 'refs/tags/v')
@@ -91,32 +100,3 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Notify on publish success
-        uses: ./
-        with:
-          app: Lark
-          webhook: ${{ secrets.CUSTOM_BOT_WEBHOOK }}
-          secret: ${{ secrets.CUSTOM_BOT_SECRET }}
-          template: >-
-            {
-              "msg_type": "interactive",
-              "card": {
-                "elements": [
-                  {
-                    "tag": "div",
-                    "text": {
-                      "tag": "lark_md",
-                      "content": "版本 **${{ github.ref_name }}** 已成功发布到 npm!"
-                    }
-                  }
-                ],
-                "header": {
-                  "template": "green",
-                  "title": {
-                    "tag": "plain_text",
-                    "content": "📦 包发布成功"
-                  }
-                }
-              }
-            }
