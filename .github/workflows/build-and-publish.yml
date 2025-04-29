@@ -71,7 +71,10 @@ jobs:
           cache: 'pnpm'
           
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
+
+      - name: build package
+        run: npm run build
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -79,10 +82,6 @@ jobs:
           name: dist
           path: dist/
 
-      - name: Publish to npm
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -93,31 +92,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Notify on publish success
-        uses: ./
-        with:
-          app: Lark
-          webhook: ${{ secrets.CUSTOM_BOT_WEBHOOK }}
-          secret: ${{ secrets.CUSTOM_BOT_SECRET }}
-          template: >-
-            {
-              "msg_type": "interactive",
-              "card": {
-                "elements": [
-                  {
-                    "tag": "div",
-                    "text": {
-                      "tag": "lark_md",
-                      "content": "版本 **${{ github.ref_name }}** 已成功发布到 npm!"
-                    }
-                  }
-                ],
-                "header": {
-                  "template": "green",
-                  "title": {
-                    "tag": "plain_text",
-                    "content": "📦 包发布成功"
-                  }
-                }
-              }
-            }
