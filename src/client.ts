@@ -124,7 +124,9 @@ export class Client {
       try {
         payload = JSON.parse(template);
       } catch (err: any) {
-        throw new Error('Parameter template must be a JSON object. JSON parse error: ' + err.message);
+        throw new Error('Parameter template must be a JSON object. JSON parse error: ' + err.message
+          + '\n' + template
+        );
       }
     }
 
