@@ -1,0 +1,123 @@
+name: Build and Publish
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+          
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false
+          
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run format check
+        run: pnpm run format-check
+        
+      - name: Build package
+        run: pnpm run build
+        
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+          
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false
+          
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/**/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+    #   - name: Notify on publish success
+    #     uses: northwang-lucky/chatbot-webhook-client@latest
+    #     with:
+    #       app: Lark
+    #       webhook: ${{ secrets.CUSTOM_BOT_WEBHOOK }}
+    #       secret: ${{ secrets.CUSTOM_BOT_SECRET }}
+    #       template: >-
+    #         {
+    #           "msg_type": "interactive",
+    #           "card": {
+    #             "elements": [
+    #               {
+    #                 "tag": "div",
+    #                 "text": {
+    #                   "tag": "lark_md",
+    #                   "content": "版本 **${{ github.ref_name }}** 已成功发布到 npm!"
+    #                 }
+    #               }
+    #             ],
+    #             "header": {
+    #               "template": "green",
+    #               "title": {
+    #                 "tag": "plain_text",
+    #                 "content": "📦 包发布成功"
+    #               }
+    #             }
+    #           }
+    #         }
