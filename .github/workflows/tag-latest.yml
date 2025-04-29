@@ -3,7 +3,7 @@ name: Update latest tag
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   update-latest-tag:
